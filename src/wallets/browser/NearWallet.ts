@@ -1,7 +1,7 @@
 import BrowserWallet from "../types/BrowserWallet";
 import INearWallet from "../../interfaces/INearWallet";
 import EventHandler from "../../utils/EventHandler";
-import { WalletConnection, Contract } from "near-api-js";
+import {WalletConnection, Contract, transactions} from "near-api-js";
 import { getState } from "../../state/State";
 
 export default class NearWallet extends BrowserWallet implements INearWallet {
@@ -62,6 +62,24 @@ export default class NearWallet extends BrowserWallet implements INearWallet {
     gas?: string,
     deposit?: string
   ): Promise<any> {
+    console.log("Call Contract");
+
+    if (method === "addMessage") {
+      // @ts-ignore
+      return await this.wallet.account().signAndSendTransaction({
+        receiverId: this.wallet.account().accountId,
+        actions: [
+          transactions.functionCall(
+              method,
+              args || {},
+              // @ts-ignore.
+              gas,
+              deposit
+          )
+        ]
+      })
+    }
+
     const state = getState();
     if (!this.contract) {
       this.contract = new Contract(
