@@ -5,7 +5,6 @@ import State from "../../state/State";
 import modalHelper from "../../modal/ModalHelper";
 
 export default class SenderWallet extends InjectedWallet implements ISenderWallet {
-  private contract: any;
 
   constructor() {
     super("senderwallet", "Sender Wallet", "Sender Wallet", "https://senderwallet.io/logo.png", "wallet");
@@ -34,7 +33,6 @@ export default class SenderWallet extends InjectedWallet implements ISenderWalle
     const response = await window[this.injectedGlobal].requestSignIn({
       contractId: State.options.contract.address,
     });
-    console.log(response);
 
     if (response.accessKey) {
       this.setWalletAsSignedIn();
@@ -70,16 +68,7 @@ export default class SenderWallet extends InjectedWallet implements ISenderWalle
     };
   }
 
-  async callContract(method: string, args?: any, gas?: string, deposit?: string): Promise<any> {
-    if (!this.contract) {
-      if (!State.nearConnection) return;
-      this.contract = await State.nearConnection.loadContract(State.options.contract.address, {
-        viewMethods: State.options.contract.viewMethods,
-        changeMethods: State.options.contract.changeMethods,
-        sender: window[this.injectedGlobal].getAccountId(),
-      });
-    }
-    console.log(this.contract, method, args, gas, deposit);
-    return this.contract[method](args);
+  async callContract(transaction: any): Promise<any> {
+    return transaction
   }
 }

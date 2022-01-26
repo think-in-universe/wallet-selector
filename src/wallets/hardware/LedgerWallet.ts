@@ -6,8 +6,6 @@ import modalHelper from "../../modal/ModalHelper";
 import ILedgerWallet from "../../interfaces/ILedgerWallet";
 import EventHandler from "../../utils/EventHandler";
 import State from "../../state/State";
-import { providers, transactions, utils } from "near-api-js";
-import BN from "bn.js";
 
 export default class LedgerWallet extends HardwareWallet implements ILedgerWallet {
   private readonly CLA = 0x80;
@@ -84,6 +82,7 @@ export default class LedgerWallet extends HardwareWallet implements ILedgerWalle
     modalHelper.hideSelectWalletOptionModal();
   }
 
+  //@ts-ignore
   private async sign(transactionData: Uint8Array) {
     if (!this.transport) return;
     const txData = Buffer.from(transactionData);
@@ -170,6 +169,7 @@ export default class LedgerWallet extends HardwareWallet implements ILedgerWalle
     return bs58.encode(Buffer.from(publicKey));
   }
 
+  //@ts-ignore
   private async createFullAccessKey(accountId: string, publicKey: string) {
     if (!State.nearConnection) return;
     const account = await State.nearConnection.account(accountId);
@@ -177,90 +177,91 @@ export default class LedgerWallet extends HardwareWallet implements ILedgerWalle
     return res;
   }
 
-  async callContract(method: string, args?: any, gas: string = "10000000000000", deposit: string = "0") {
-    if (!State.signedInWalletId) return;
+  async callContract(transaction: any) {
+    return transaction
+    // if (!State.signedInWalletId) return;
 
-    if (State.options.contract.viewMethods.includes(method)) {
-      return await State.walletProviders.nearwallet.callContract(method, args);
-    }
+    // if (State.options.contract.viewMethods.includes(method)) {
+    //   return await State.walletProviders.nearwallet.callContract(method, args);
+    // }
 
-    if (!args) args = [];
+    // if (!args) args = [];
 
-    const publicKey = this.getPublicKey();
+    // const publicKey = this.getPublicKey();
 
-    const bnGas = new BN(gas.toString());
-    const bnDeposit = new BN(deposit.toString());
+    // const bnGas = new BN(gas.toString());
+    // const bnDeposit = new BN(deposit.toString());
 
-    const publicKeyString = "ed25519:" + this.encodePublicKey(publicKey);
+    // const publicKeyString = "ed25519:" + this.encodePublicKey(publicKey);
 
-    const provider = new providers.JsonRpcProvider(`https://rpc.${State.options.networkId}.near.org`);
+    // const provider = new providers.JsonRpcProvider(`https://rpc.${State.options.networkId}.near.org`);
 
-    // Tries to create a full access key for the account, if it fails, it means the account already has a full access key
-    await this.createFullAccessKey("amirsaran.testnet", publicKeyString).catch((err) => {
-      console.log(err);
-    });
+    // // Tries to create a full access key for the account, if it fails, it means the account already has a full access key
+    // await this.createFullAccessKey("amirsaran.testnet", publicKeyString).catch((err) => {
+    //   console.log(err);
+    // });
 
-    const response: any = await provider
-      .query({
-        request_type: "view_access_key",
-        finality: "optimistic",
-        account_id: "amirsaran.testnet",
-        public_key: publicKeyString,
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    // const response: any = await provider
+    //   .query({
+    //     request_type: "view_access_key",
+    //     finality: "optimistic",
+    //     account_id: "amirsaran.testnet",
+    //     public_key: publicKeyString,
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
 
-    if (!response) return;
+    // if (!response) return;
 
-    const blockHash = response.block_hash;
-    const recentBlockHash = utils.serialize.base_decode(blockHash);
-    const nonce = response.nonce + 1;
+    // const blockHash = response.block_hash;
+    // const recentBlockHash = utils.serialize.base_decode(blockHash);
+    // const nonce = response.nonce + 1;
 
-    const keyPair = utils.key_pair.KeyPairEd25519.fromRandom();
+    // const keyPair = utils.key_pair.KeyPairEd25519.fromRandom();
 
-    const pk = keyPair.getPublicKey();
-    pk.data = publicKey;
-    console.log(pk);
+    // const pk = keyPair.getPublicKey();
+    // pk.data = publicKey;
+    // console.log(pk);
 
-    const actions = [transactions.functionCall(method, args, bnGas, bnDeposit)];
+    // const actions = [transactions.functionCall(method, args, bnGas, bnDeposit)];
 
-    const transaction = transactions.createTransaction(
-      "amirsaran.testnet",
-      pk,
-      State.options.contract.address,
-      nonce,
-      actions,
-      recentBlockHash
-    );
+    // const transaction = transactions.createTransaction(
+    //   "amirsaran.testnet",
+    //   pk,
+    //   State.options.contract.address,
+    //   nonce,
+    //   actions,
+    //   recentBlockHash
+    // );
 
-    const serializedTx = utils.serialize.serialize(transactions.SCHEMA, transaction);
-    console.log(serializedTx, transaction);
+    // const serializedTx = utils.serialize.serialize(transactions.SCHEMA, transaction);
+    // console.log(serializedTx, transaction);
 
-    const signature = await this.sign(serializedTx);
+    // const signature = await this.sign(serializedTx);
 
-    const signedTransaction = new transactions.SignedTransaction({
-      transaction,
-      signature: new transactions.Signature({
-        keyType: transaction.publicKey.keyType,
-        data: signature,
-      }),
-    });
+    // const signedTransaction = new transactions.SignedTransaction({
+    //   transaction,
+    //   signature: new transactions.Signature({
+    //     keyType: transaction.publicKey.keyType,
+    //     data: signature,
+    //   }),
+    // });
 
-    const signedSerializedTx = signedTransaction.encode();
+    // const signedSerializedTx = signedTransaction.encode();
 
-    const base64Response: any = await provider.sendJsonRpc("broadcast_tx_commit", [
-      Buffer.from(signedSerializedTx).toString("base64"),
-    ]);
+    // const base64Response: any = await provider.sendJsonRpc("broadcast_tx_commit", [
+    //   Buffer.from(signedSerializedTx).toString("base64"),
+    // ]);
 
-    console.log(base64Response);
+    // console.log(base64Response);
 
-    if (base64Response.status.SuccessValue === "") {
-      return true;
-    }
+    // if (base64Response.status.SuccessValue === "") {
+    //   return true;
+    // }
 
-    const res = JSON.parse(Buffer.from(base64Response.status.SuccessValue, "base64").toString());
+    // const res = JSON.parse(Buffer.from(base64Response.status.SuccessValue, "base64").toString());
 
-    return res;
+    // return res;
   }
 }

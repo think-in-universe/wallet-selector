@@ -2,11 +2,14 @@ import BrowserWallet from "../types/BrowserWallet";
 import INearWallet from "../../interfaces/INearWallet";
 import EventHandler from "../../utils/EventHandler";
 import State from "../../state/State";
-import { WalletConnection, Contract } from "near-api-js";
+import { WalletConnection } from "near-api-js";
+// import BN from "bn.js";
+
+//const provider = new providers.JsonRpcProvider(`https://rpc.${State.options.networkId}.near.org`);
 
 export default class NearWallet extends BrowserWallet implements INearWallet {
   private wallet: WalletConnection;
-  private contract: Contract;
+  // private contract: Contract;
 
   constructor() {
     super("nearwallet", "Near Wallet", "Near Wallet", "https://cryptologos.cc/logos/near-protocol-near-logo.png");
@@ -49,14 +52,26 @@ export default class NearWallet extends BrowserWallet implements INearWallet {
     };
   }
 
-  async callContract(method: string, args?: any, gas?: string, deposit?: string): Promise<any> {
-    if (!this.contract) {
-      this.contract = new Contract(this.wallet.account(), State.options.contract.address, {
-        viewMethods: State.options.contract.viewMethods,
-        changeMethods: State.options.contract.changeMethods,
-      });
-    }
-    console.log(this.contract, method, args, gas, deposit);
-    return this.contract[method](args);
+  async callContract(transaction: any): Promise<any> {
+
+    //@ts-ignore
+    return await this.wallet.account().signAndSendTransaction(transaction)
+    // console.log(method, args, gas, deposit )
+    // if (!State.nearConnection) return;
+    //   const acc = new Account(State.nearConnection.connection, this.wallet.getAccountId())
+    // acc.signAndSendTransaction(
+    //   transactions
+  //   if (!this.contract) {
+  //     this.contract = new Contract(this.wallet.account(), State.options.contract.address, {
+  //       viewMethods: State.options.contract.viewMethods,
+  //       changeMethods: State.options.contract.changeMethods,
+  //     });
+  //   }
+  //   console.log(this.contract, method, args, gas, deposit);
+  //   if(deposit){
+  //       return this.contract[method](args, gas, deposit);
+  //   }
+  //   return this.contract[method](args);
+  // }
   }
 }
