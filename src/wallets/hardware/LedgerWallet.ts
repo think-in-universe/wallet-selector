@@ -6,7 +6,11 @@ import ILedgerWallet from "../../interfaces/ILedgerWallet";
 import { getState, updateState } from "../../state/State";
 import { providers, transactions, utils } from "near-api-js";
 import BN from "bn.js";
+<<<<<<< HEAD
 import { Emitter } from "../../utils/EventsHandler";
+=======
+import { CallParams, ViewParams } from "../../interfaces/IWallet";
+>>>>>>> 88933653e8377e23c87fe454fc901f24e83ac77c
 
 export default class LedgerWallet
   extends HardwareWallet
@@ -180,8 +184,7 @@ export default class LedgerWallet
     const hasPersmission = await this.checkAccountId(this.accountId, "ed25519:" + publicKeyString);
 
     if (!hasPersmission) {
-      console.log("You do not have permission to sign transactions for this account");
-      return;
+      throw new Error("You do not have permission to sign transactions for this account");
     }
 
     this.setWalletAsSignedIn();
@@ -217,12 +220,47 @@ export default class LedgerWallet
     return bs58.encode(Buffer.from(publicKey));
   }
 
+  async view({ contractId, methodName, args }: ViewParams) {
+    const state = getState();
+
+    console.log("LedgerWallet:view", { contractId, methodName, args });
+
+    return await state.walletProviders.nearwallet.view({
+      contractId,
+      methodName,
+      args
+    });
+  }
+
+  // TODO: Refactor callContract into this new method.
+  async call({ receiverId, actions }: CallParams) {
+    console.log("LedgerWallet:call", { receiverId, actions });
+
+    // To keep the alias simple, lets just support a single action.
+    if (actions.length !== 1) {
+      throw new Error("Ledger Wallet implementation currently supports just one action");
+    }
+
+    const action = actions[0];
+
+    return this.callContract(
+      action.methodName,
+      action.args,
+      action.gas,
+      action.deposit
+    );
+  }
+
   async callContract(method: string, args?: any, gas: string = "10000000000000", deposit: string = "0") {
     const state = getState();
     if (!state.signedInWalletId) return;
 
     if (state.options.contract.viewMethods.includes(method)) {
-      return await state.walletProviders.nearwallet.callContract(method, args);
+      return await state.walletProviders.nearwallet.view({
+        contractId: state.options.contract.address,
+        methodName: method,
+        args
+      });
     }
 
     if (!args) args = [];
@@ -238,7 +276,7 @@ export default class LedgerWallet
     if (!response) return;
 
     const recentBlockHash = utils.serialize.base_decode(response.header.hash);
-    const nonce = this.nonce + 1;
+    const nonce = ++this.nonce;
 
     const keyPair = utils.key_pair.KeyPairEd25519.fromRandom();
 
