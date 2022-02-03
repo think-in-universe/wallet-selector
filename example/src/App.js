@@ -18,6 +18,10 @@ const App = ({ near, contract, currentUser2 }) => {
   useEffect(() => {
     // TODO: don't just fetch once; subscribe!
     contract.callContract("getMessages").then(setMessages);
+  
+    near.on("init", async () => {
+      console.log("init")
+    })
 
     near.on("signIn", async () => {
       console.log(currentUser);

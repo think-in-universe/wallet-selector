@@ -3,6 +3,9 @@ import INearWallet from "../../interfaces/INearWallet";
 import { WalletConnection, Contract } from "near-api-js";
 import { getState } from "../../state/State";
 import { Emitter } from "../../utils/EventsHandler";
+import { logging } from '../../utils/Logger';
+
+const logger = logging.getLogger('core.module-name');
 
 export default class NearWallet extends BrowserWallet implements INearWallet {
   private wallet: WalletConnection;
@@ -20,10 +23,9 @@ export default class NearWallet extends BrowserWallet implements INearWallet {
 
   async init() {
     const state = getState();
+    logger.info(`This is my log message`);
     if (!state.nearConnection) return;
     this.wallet = new WalletConnection(state.nearConnection, "near_app");
-    console.log("emit")
-    this.emitter.emit("init");
     if (this.wallet.isSignedIn()) {
       this.setWalletAsSignedIn();
     }

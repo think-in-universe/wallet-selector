@@ -78,7 +78,6 @@ export default class SenderWallet
       .then((res: any) => {
         console.log(res);
       });
-    this.emitter.emit("init");
   }
 
   async isConnected(): Promise<boolean> {

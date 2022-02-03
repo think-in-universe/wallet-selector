@@ -155,7 +155,6 @@ export default class LedgerWallet
       this.emitter.emit("disconnect", {});
     });
 
-    this.emitter.emit("init", {});
   }
 
   async disconnect() {

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import App from "./App";
 import getConfig from "./config.js";
 import NearWalletSelector from "near-walletselector";
+import { async } from "regenerator-runtime";
 
 // Initializing contract
 async function initContract() {
@@ -32,12 +33,7 @@ async function initContract() {
 
   // Load in user's account data
   const contract = near.getContract();
-  console.log("subscribe")
-  near.on("init", async () => {
-    console.log("init");
-  });
   let currentUser = await near.getAccount();
-  console.log(currentUser);
   return { near, contract, currentUser, nearConfig };
 }
 
