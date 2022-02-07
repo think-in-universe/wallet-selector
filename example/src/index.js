@@ -14,13 +14,9 @@ async function initContract() {
     wallets: ["nearwallet", "senderwallet", "ledgerwallet"],
     networkId: "testnet",
     theme: "light",
-    contract: {
-      address: nearConfig.contractName,
-      viewMethods: ["getMessages"],
-      changeMethods: ["addMessage"],
-    },
+    accountId: nearConfig.contractName,
     walletSelectorUI: {
-      description: "Please select a wallet to connect to this dapp:",
+      description: "Please select a wallet to connect to this dApp:",
       explanation: [
         "Wallets are used to send, receive, and store digital assets.",
         "There are different types of wallets. They can be an extension",
@@ -31,13 +27,19 @@ async function initContract() {
   });
 
   // Load in user's account data
-  const contract = near.getContract();
   near.on("init", async () => {
     console.log("init");
   });
+
   let currentUser = await near.getAccount();
   console.log(currentUser);
-  return { near, contract, currentUser, nearConfig };
+
+  return {
+    near,
+    contract: near.contract,
+    currentUser,
+    nearConfig
+  };
 }
 
 window.onload = () => {
