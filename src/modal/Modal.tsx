@@ -78,14 +78,16 @@ function Modal(): JSX.Element {
   }
 
   return (
-    <div style={{ display: state.showModal ? "block" : "none" }}>
+    <div data-testid="Modal.Container" style={{ display: state.showModal ? "block" : "none" }}>
       <style>{styles}</style>
       <div
+        data-testid="Modal.Backdrop"
         className={`Modal ${getThemeClass(state.options.theme)}`}
         onClick={handleCloseModal}
       >
         <div className="Modal-content">
           <div
+           data-testid="Modal.WalletOptions"
             style={{ display: state.showWalletOptions ? "block" : "none" }}
             className="Modal-body Modal-select-wallet-option"
           >
@@ -108,6 +110,7 @@ function Modal(): JSX.Element {
                         : ""
                     }
                     id={state.walletProviders[wallet].getId()}
+                    data-testid="Modal.ListItem"
                     key={state.walletProviders[wallet].getName()}
                     onClick={async () => {
                       await state.walletProviders[wallet].walletSelected();
